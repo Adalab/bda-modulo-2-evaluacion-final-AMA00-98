@@ -245,9 +245,58 @@ SELECT a.first_name AS nombre_actor, COUNT(fa.film_id) AS total_peliculas -- Col
 /* Ejercicio 22:
 Encuentra el título de todas las películas que fueron alquiladas por más de 5 días. 
 Utiliza una subconsulta para encontrar los rental_ids con una duración superior a 5 días y luego selecciona las películas correspondientes.
-Respuesta: */
+Respuesta:'DATEDIFF' + 'INNER JOIN' + 'WHERE' + 'Subconsulta' */
 
+-- Consulta 1: Consultamos datos claves para saber qué tipos de datos nos ofrecen
 
+SELECT title -- Nombre de las películas
+	FROM film
+    LIMIT 10;
+    
+SELECT film_id -- Los IDs de las películas
+	FROM film
+    LIMIT 10;
+
+SELECT rental_id -- Los IDs de los alquileres
+	FROM rental
+    LIMIT 10;
+
+-- Consulta 2: Calculamos la diferencia de los días de alquiler entre la fecha en el que se alquiló y la fecha que se devolvió la película --> 'DATEDIFF(fecha_final, fecha_inicial)' (Sino, la diferencia sale en números negativos)
+
+SELECT DATEDIFF(return_date, rental_date) 
+	FROM rental
+    LIMIT 10;
+
+SELECT DATEDIFF(return_date, rental_date) 
+	FROM rental
+    WHERE DATEDIFF(return_date, rental_date) > 5
+    LIMIT 10;
+
+-- Consulta 3: Filtramos los IDs de las películas superiores a 5 días de alquiler -- 'DISTINCT' + 'INNER JOIN' + 'WHERE'
+
+SELECT i.film_id 
+	FROM inventory AS i
+		INNER JOIN rental AS r
+			ON i.inventory_id = r.inventory_id 
+	WHERE DATEDIFF(r.return_date, r.rental_date) > 5
+    LIMIT 10;
+    
+SELECT DISTINCT i.film_id
+	FROM inventory AS i
+		INNER JOIN rental AS r
+			ON i.inventory_id = r.inventory_id 
+	WHERE DATEDIFF(r.return_date, r.rental_date) > 5
+    LIMIT 10;
+    
+-- Subconsulta:
+
+SELECT title AS nombre_pelicula -- Consulta principal: "Encuentra el título de todas las películas"
+	FROM film
+	WHERE film_id IN (SELECT i.film_id -- Consulta interna - Condición: "Que fueron alquiladas por más de 5 días"
+							FROM inventory AS i
+								INNER JOIN rental AS r
+									ON i.inventory_id = r.inventory_id 
+							WHERE DATEDIFF(r.return_date, r.rental_date) > 5); -- Resultado: 955 datos
 
 /* Ejercicio 23:
 Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría "Horror". 
