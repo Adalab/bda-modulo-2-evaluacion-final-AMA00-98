@@ -49,7 +49,7 @@ SELECT first_name AS nombre_actor, last_name AS appelido
  
 /* Ejercicio 7:
 Encuentra los nombres de los actores que tengan un actor_id entre 10 y 20.
-Respuesta: 'BETWEEN' */
+Respuesta: 'BETWEEN' + 'AND' */
  
 SELECT first_name AS nombre_actor, last_name AS appelido
 	FROM actor
@@ -97,9 +97,9 @@ SELECT c.name AS categoria, COUNT(r.rental_id) AS total_peliculas_alquiladas -- 
 	FROM category AS c -- Tabla 1 (principal)
 		INNER JOIN film_category AS fc -- Tabla 2 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
 			ON c.category_id  = fc.category_id -- FK
-		INNER JOIN film AS f -- Tabla 3 (contrastar datos)
+		INNER JOIN film AS f -- Tabla 3 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
 			ON fc.film_id = f.film_id -- FK
-		INNER JOIN inventory AS i -- Tabla 4 (contrastar datos)
+		INNER JOIN inventory AS i -- Tabla 4 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
 			ON f.film_id = i.film_id -- FK
 		INNER JOIN rental AS r -- Tabla 5 (contrastar datos)
 			ON i.inventory_id = r.inventory_id -- FK
@@ -124,7 +124,16 @@ SELECT a.first_name AS nombre_actor, a.last_name AS apellido -- Columnas + Alias
 		INNER JOIN film AS f -- Tabla 3 (contrastar datos)
 			ON fa.film_id = f.film_id -- FK
     WHERE f.title = "Indian Love"; -- Resultado: 10 datos 
- 
+
+-- Comprobamos que aparecen en la misma película
+SELECT a.first_name AS nombre_actor, a.last_name AS apellido, f.title AS nombre_pelicula
+	FROM actor AS a 
+		INNER JOIN film_actor AS fa 
+			ON a.actor_id  = fa.actor_id 
+		INNER JOIN film AS f 
+			ON fa.film_id = f.film_id 
+    WHERE f.title = "Indian Love"; -- Resultado: 10 datos 
+    
 /* Ejercicio 14:
 Muestra el título de todas las películas que contengan la palabra "dog" o "cat" en su descripción.
 Respuesta: 'LIKE' + 'OR' */
@@ -144,4 +153,82 @@ SELECT a.first_name AS nombre_actor, a.last_name AS apellido -- Columnas + Alias
     WHERE fa.film_id IS NULL; -- Resultado: 0 datos 
 
 /* Ejercicio 16:
-Recupera los nombres de todos los actores */
+Encuentra el título de todas las películas que fueron lanzadas entre el año 2005 y 2010.
+Respuesta: 'BETWEEN' + 'AND' */
+
+SELECT title AS nombre_pelicula
+	FROM film
+    WHERE release_year BETWEEN 2005 AND 2010; -- Resultado: 1000 datos
+
+-- Comprobamos los años
+SELECT title AS nombre_pelicula, release_year AS año_lanzamiento 
+	FROM film
+    WHERE release_year BETWEEN 2005 AND 2010; -- Resultado: 1000 datos
+
+/* Ejercicio 17:
+Encuentra el título de todas las películas que son de la misma categoría que "Family".
+Respuesta: 'INNER JOIN' con 3 Tablas + 'WHERE' */
+ 
+SELECT f.title AS nombre_pelicula -- Columna + Alias
+	FROM film AS f -- Tabla 1 (principal)
+		INNER JOIN film_category AS fc -- Tabla 2 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
+			ON f.film_id  = fc.film_id -- FK
+		INNER JOIN category AS c -- Tabla 3 (contrastar datos)
+			ON fc.category_id = c.category_id -- FK
+    WHERE c.name = "Family"; -- Resultado: 69 datos 
+
+-- Comprobamos que llevan el mismo nombre de la categoría
+SELECT f.title AS nombre_pelicula, c.name AS nombre_categoria
+	FROM film AS f 
+		INNER JOIN film_category AS fc 
+			ON f.film_id  = fc.film_id 
+		INNER JOIN category AS c 
+			ON fc.category_id = c.category_id 
+    WHERE c.name = "Family"; -- Resultado: 69 datos
+
+/* Ejercicio 18:
+Muestra el nombre y apellido de los actores que aparecen en más de 10 películas.
+Respuesta: 'COUNT()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' con 3 Tablas' 
+pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
+
+SELECT a.first_name AS nombre_actor, a.last_name AS apellido, COUNT(fa.film_id) AS total_peliculas -- Columnas + Alias
+	FROM actor AS a -- Tabla 1 (principal)
+		INNER JOIN film_actor AS fa -- Tabla 2 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
+			ON a.actor_id  = fa.actor_id -- FK
+		INNER JOIN film AS f -- Tabla 3 (contrastar datos)
+			ON fa.film_id = f.film_id -- FK
+    GROUP BY a.actor_id
+    HAVING total_peliculas > 10
+    ORDER BY total_peliculas ASC; -- Resultado: 200 datos 
+
+/* Ejercicio 19:
+Encuentra el título de todas las películas que son "R" y tienen una duración mayor a 2 horas en la tabla film.
+Respuesta: 'WHERE' + 'AND'
+Pd: 2h = 120 mins */
+
+-- Observamos dónde podría ir la "R"
+SELECT *
+	FROM film;
+    
+SELECT title AS nombre_pelicula
+	FROM film
+	WHERE rating = "R" AND length > 120; -- Resultado: 90 datos
+
+/* Ejercicio 20:
+Encuentra las categorías de películas que tienen un promedio de duración superior a 120 minutos y muestra el nombre de la categoría junto con el promedio de duración.
+Respuesta: 'AVG()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' con 3 Tablas' 
+pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
+
+SELECT c.name AS nombre_categoria, AVG(f.length) AS promedio_duracion_peliculas -- Columnas + Alias
+	FROM category AS c -- Tabla 1 (principal)
+		INNER JOIN film_category AS fc -- Tabla 2 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
+			ON c.category_id  = fc.category_id -- FK
+		INNER JOIN film AS f -- Tabla 3 (contrastar datos)
+			ON fc.film_id = f.film_id -- FK
+    GROUP BY c.name
+    HAVING promedio_duracion_peliculas > 120
+    ORDER BY promedio_duracion_peliculas ASC; -- Resultado: 4 datos 
+
+/* Ejercicio 21:
+Recupera los nombres de todos los actores
+Respuesta: */
