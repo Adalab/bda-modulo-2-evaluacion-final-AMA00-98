@@ -274,21 +274,21 @@ SELECT DATEDIFF(return_date, rental_date)
 
 -- Consulta 3: Filtramos los IDs de las películas superiores a 5 días de alquiler -- 'DISTINCT' + 'INNER JOIN' + 'WHERE'
 
-SELECT i.film_id 
+SELECT i.film_id -- Columna
+	FROM inventory AS i -- Tabla 1 (principal)
+		INNER JOIN rental AS r -- Tabla 2 (contrastar datos) 
+			ON i.inventory_id = r.inventory_id -- FK
+	WHERE DATEDIFF(r.return_date, r.rental_date) > 5 -- Condición
+    LIMIT 10;
+    
+SELECT DISTINCT i.film_id -- Lo mismo, pero sin que haya repetidos
 	FROM inventory AS i
 		INNER JOIN rental AS r
 			ON i.inventory_id = r.inventory_id 
 	WHERE DATEDIFF(r.return_date, r.rental_date) > 5
     LIMIT 10;
     
-SELECT DISTINCT i.film_id
-	FROM inventory AS i
-		INNER JOIN rental AS r
-			ON i.inventory_id = r.inventory_id 
-	WHERE DATEDIFF(r.return_date, r.rental_date) > 5
-    LIMIT 10;
-    
--- Subconsulta:
+-- Subconsulta: Juntamos Consulta 1 y Consulta 3
 
 SELECT title AS nombre_pelicula -- Consulta principal: "Encuentra el título de todas las películas"
 	FROM film
@@ -303,9 +303,81 @@ Encuentra el nombre y apellido de los actores que no han actuado en ninguna pel�
 Utiliza una subconsulta para encontrar los actores que han actuado en películas de la categoría "Horror" y luego exclúyelos de la lista de actores.
 Respuesta: */
 
+-- Consulta 1: Consultamos datos claves para saber qué tipos de datos nos ofrecen
 
+SELECT first_name, last_name -- Nombre y apellidos de los artistas
+	FROM actor
+    LIMIT 10;
+    
+SELECT DISTINCT name -- Los diferentes nombres de las categorías
+	FROM category
+    LIMIT 10; -- Resultado: No vemos la categoría "Horror"
+
+-- Consulta 2: Filtramos la categoría "Horror"
+
+SELECT name 
+	FROM category
+	WHERE name = "Horror"; -- Resutado: 1 dato
+
+-- Consulta 3: Filtramos los diferentes IDs de los artistas que han actuado en las películas con la categoría "Horror"  
+
+SELECT DISTINCT fa.actor_id -- Columna
+	FROM film_actor AS fa -- Tabla 1 (principal)
+		INNER JOIN film AS f -- Tabla 2 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
+			ON fa.film_id = f.film_id -- FK
+		INNER JOIN film_category AS fc -- Tabla 3 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
+			ON f.film_id = fc.film_id -- FK
+		INNER JOIN category AS c -- Tabla 4 (contrastar datos) 
+			ON fc.category_id = c.category_id -- FK
+	WHERE c.name = "Horror"
+    LIMIT 10;
+    
+-- Subconsulta: Juntamos las Consultas 1 y 3
+
+SELECT first_name AS nombre_actor, last_name AS apellido -- Consulta principal: "Encuentra el nombre y apellido de los actores"
+	FROM actor
+	WHERE actor_id NOT IN (SELECT DISTINCT fa.actor_id -- Consulta interna - Condición: "Que no han actuado en ninguna película de la categoría "Horror"
+								FROM film_actor AS fa 
+									INNER JOIN film AS f 
+										ON fa.film_id = f.film_id 
+									INNER JOIN film_category AS fc 
+										ON f.film_id = fc.film_id 
+									INNER JOIN category AS c 
+										ON fc.category_id = c.category_id
+								WHERE c.name = "Horror"); -- Resultado: 44 datos
 
 /* Ejercicio 24:
 Encuentra el título de las películas que son comedias y tienen una duración mayor a 180 minutos en la tabla film.
 Respuesta: */
+
+SELECT *
+	FROM film
+    LIMIT 10;
+
+SELECT DISTINCT description
+	FROM film;
+
+SELECT *
+	FROM film
+    WHERE description LIKE "% Comedy %"; -- Resultado: No se encuentra la palabra
+
+SELECT DISTINCT name
+	FROM category; -- Resultado: Se muestra en esta tabla la palabra "Comedy"
+
+SELECT f.title AS nombre_pelicula
+	FROM film AS f
+		INNER JOIN film_category AS fc
+			ON f.film_id = fc.film_id
+		INNER JOIN category AS c
+			ON fc.category_id = c.category_id
+	WHERE c.name = "Comedy" AND f.length > 180; -- Resultado: 3 datos
+
+-- Comprobamos
+SELECT f.title AS nombre_pelicula, c.name AS nombre_categoria, f.length AS duracion_pelicula
+	FROM film AS f
+		INNER JOIN film_category AS fc
+			ON f.film_id = fc.film_id
+		INNER JOIN category AS c
+			ON fc.category_id = c.category_id
+	WHERE c.name = "Comedy" AND f.length > 180; -- Resultado: 3 datos
 

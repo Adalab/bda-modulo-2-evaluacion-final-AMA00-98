@@ -1,5 +1,4 @@
 # Examen final Módulo 2
-## Extraer infrormación de la Web y Bases de datos (BBDD)
 
 - **Nombre:** Ana Marín Aguirre
 - **Bootcamp:** Data Analytics & IA
@@ -9,9 +8,9 @@
 
 Este repositorio contiene la solución a la prueba técnica del módulo 2, implementando dentro de la herramienta MySQL Workbench:
 
-- - Consultas básicas ('SELECT')
-- - Joins ('INNER') 
-- - Subconsultas 
+- Consultas básicas ('SELECT')
+- Joins ('INNER') 
+- Subconsultas 
 
 ## *Notas adicionales*
 
