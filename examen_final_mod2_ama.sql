@@ -4,14 +4,14 @@ USE sakila;
 
 /* Ejercicio 1:
 Selecciona todos los nombres de las películas sin que aparezcan duplicados.
-Respuesta: 'DISTINCT' */ 
+Respuesta: 'DISTINCT' para garantizar que no hay datos repetidos repetidos */ 
 
 SELECT DISTINCT title AS nombre_pelicula
 	FROM film; -- Resultado: 1000 datos
 
 /* Ejercicio 2:
 Muestra los nombres de todas las películas que tengan una clasificación de "PG-13".
-Respuesta: 'WHERE' */
+Respuesta: 'WHERE' + '=' para filtrar por un valor exacto */
 
 SELECT title AS nombre_pelicula
 	FROM film
@@ -19,15 +19,15 @@ SELECT title AS nombre_pelicula
     
 /* Ejercicio 3:
 Encuentra el título y la descripción de todas las películas que contengan la palabra "amazing" en su descripción.
-Respuesta: 'LIKE' */
+Respuesta: 'LIKE' para filtrar dentro de un texto */
 
 SELECT title AS nombre_pelicula, description AS descripcion
 	FROM film
-    WHERE description LIKE "% amazing %"; -- Resultado: 48 datos
+    WHERE description LIKE "%amazing%"; -- Resultado: 48 datos
 
 /* Ejercicio 4:
 Encuentra el título de todas las películas que tengan una duración mayor a 120 minutos.
-Respuesta: '>' */
+Respuesta: '>' = mayor que */
 
 SELECT title AS nombre_pelicula
 	FROM film
@@ -41,7 +41,7 @@ SELECT first_name AS nombre_actor
 
 /* Ejercicio 6:
 Encuentra el nombre y apellido de los actores que tengan "Gibson" en su apellido.
-Respuesta: 'WHERE' */
+Respuesta: 'WHERE' + '=' */
  
 SELECT first_name AS nombre_actor, last_name AS appelido
 	FROM actor
@@ -49,7 +49,7 @@ SELECT first_name AS nombre_actor, last_name AS appelido
  
 /* Ejercicio 7:
 Encuentra los nombres de los actores que tengan un actor_id entre 10 y 20.
-Respuesta: 'BETWEEN' + 'AND' */
+Respuesta: 'BETWEEN' + 'AND' para filtrar esos datos, incluyéndolos */
  
 SELECT first_name AS nombre_actor, last_name AS appelido
 	FROM actor
@@ -57,7 +57,7 @@ SELECT first_name AS nombre_actor, last_name AS appelido
  
 /* Ejercicio 8:
 Encuentra el título de las películas en la tabla film que no sean ni "R" ni "PG-13" en cuanto a su clasificación.
-Respuesta: 'NOT IN()' */
+Respuesta: 'NOT IN()' para excluir múltiples valores */
  
 SELECT title AS nombre_peliculas
 	FROM film
@@ -74,15 +74,16 @@ SELECT rating AS clasificacion, COUNT(rating) AS total_peliculas
 /* Ejercicio 10:
 Encuentra la cantidad total de películas alquiladas por cada cliente y muestra el ID del cliente, su nombre y apellido junto con la cantidad de películas alquiladas.
 Respuesta: 'COUNT()' + 'GROUP BY' + 'INNER JOIN' 
+Ruta JOINS: customer > rental 
 Pd: No uso un 'LEFT JOIN' porque si el cliente no ha alquilado nunca alguna película, su nombre no aparecería */
     
-SELECT c.customer_id AS id_cliente, c.first_name AS nombre_cliente, c.last_name AS apellido, COUNT(r.rental_id) AS total_peliculas_alquiladas -- Columnas + Alias
+SELECT c.customer_id AS id_cliente, c.first_name AS nombre_cliente, c.last_name AS apellido, COUNT(r.rental_id) AS total_peliculas_alquiladas -- Columnas + Alias - SOLUCIÓN
 	FROM customer AS c -- Tabla 1 (principal)
 		INNER JOIN rental AS r -- Tabla 2 (contrastar datos)
 			ON c.customer_id  = r.customer_id -- FK
     GROUP BY c.customer_id,c.first_name, c.last_name; -- Resultado: 599 datos
 
--- Prueba con ''LEFT JOIN' - TODOS    
+-- Prueba con 'LEFT JOIN' - TODOS    
 SELECT c.customer_id AS id_cliente, c.first_name AS nombre_cliente, c.last_name AS apellido, COUNT(r.rental_id) AS total_peliculas_alquiladas 
 	FROM customer AS c 
 		LEFT JOIN rental AS r
@@ -91,9 +92,10 @@ SELECT c.customer_id AS id_cliente, c.first_name AS nombre_cliente, c.last_name 
  
 /* Ejercicio 11:
 Encuentra la cantidad total de películas alquiladas por categoría y muestra el nombre de la categoría junto con el recuento de alquileres.
-Respuesta: 'COUNT()' + 'GROUP BY' + 'INNER JOIN' con 5 Tablas' */
+Respuesta: 'COUNT()' + 'GROUP BY' + 'INNER JOIN' con 5 Tablas' 
+Ruta JOINS: category > film_category > film > inventory > rental */
 
-SELECT c.name AS categoria, COUNT(r.rental_id) AS total_peliculas_alquiladas -- Columnas + Alias
+SELECT c.name AS nombre_categoria, COUNT(r.rental_id) AS total_peliculas_alquiladas -- Columnas + Alias
 	FROM category AS c -- Tabla 1 (principal)
 		INNER JOIN film_category AS fc -- Tabla 2 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
 			ON c.category_id  = fc.category_id -- FK
@@ -115,9 +117,10 @@ SELECT rating AS clasificacion, AVG(length) AS promedio_duracion
  
 /* Ejercicio 13:
 Encuentra el nombre y apellido de los actores que aparecen en la película con title "Indian Love".
-Respuesta: 'INNER JOIN' con 3 Tablas + 'WHERE' */
+Respuesta: 'INNER JOIN' con 3 Tablas + 'WHERE' + '='
+Ruta JOINS: actor > film_actory > film */
  
-SELECT a.first_name AS nombre_actor, a.last_name AS apellido -- Columnas + Alias
+SELECT a.first_name AS nombre_actor, a.last_name AS apellido -- Columnas + Alias - SOLUCIÓN
 	FROM actor AS a -- Tabla 1 (principal)
 		INNER JOIN film_actor AS fa -- Tabla 2 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
 			ON a.actor_id  = fa.actor_id -- FK
@@ -136,27 +139,28 @@ SELECT a.first_name AS nombre_actor, a.last_name AS apellido, f.title AS nombre_
     
 /* Ejercicio 14:
 Muestra el título de todas las películas que contengan la palabra "dog" o "cat" en su descripción.
-Respuesta: 'LIKE' + 'OR' */
+Respuesta: 'LIKE' + 'OR' para que filtre por un dato o por el otro */
  
 SELECT title AS nombre_pelicula
 	FROM film
-	WHERE description LIKE "% dog %" OR description = "% cat %"; -- Resultado: 99 datos
+	WHERE description LIKE "%dog%" OR description LIKE "%cat%"; -- Resultado: 167 datos
  
 /* Ejercicio 15:
 Hay algún actor o actriz que no aparezca en ninguna película en la tabla film_actor.
-Respuesta: 'INNER JOIN' + 'WHERE' + 'IS NULL' */
+Respuesta: 'LEFT JOIN' para consultar todos los registros + 'WHERE' + 'IS NULL' para los registros que no hay datos
+Ruta JOINS: actor > film_actor */
 
 SELECT a.first_name AS nombre_actor, a.last_name AS apellido -- Columnas + Alias
 	FROM actor AS a -- Tabla 1 (principal)
-		INNER JOIN film_actor AS fa -- Tabla 2 (contrastar datos) 
+		LEFT JOIN film_actor AS fa -- Tabla 2 (contrastar datos) 
 			ON a.actor_id  = fa.actor_id -- FK
-    WHERE fa.film_id IS NULL; -- Resultado: 0 datos 
+    WHERE fa.film_id IS NULL; -- Resultado: 0 datos - Todos los actores han aparecido el menos en 1 película
 
 /* Ejercicio 16:
 Encuentra el título de todas las películas que fueron lanzadas entre el año 2005 y 2010.
 Respuesta: 'BETWEEN' + 'AND' */
 
-SELECT title AS nombre_pelicula
+SELECT title AS nombre_pelicula -- SOLUCIÓN
 	FROM film
     WHERE release_year BETWEEN 2005 AND 2010; -- Resultado: 1000 datos
 
@@ -167,9 +171,10 @@ SELECT title AS nombre_pelicula, release_year AS año_lanzamiento
 
 /* Ejercicio 17:
 Encuentra el título de todas las películas que son de la misma categoría que "Family".
-Respuesta: 'INNER JOIN' con 3 Tablas + 'WHERE' */
+Respuesta: 'INNER JOIN' con 3 Tablas + 'WHERE' + '=' 
+Ruta JOINS: film > film_category > category */
  
-SELECT f.title AS nombre_pelicula -- Columna + Alias
+SELECT f.title AS nombre_pelicula -- Columna + Alias - SOLUCIÓN
 	FROM film AS f -- Tabla 1 (principal)
 		INNER JOIN film_category AS fc -- Tabla 2 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
 			ON f.film_id  = fc.film_id -- FK
@@ -188,7 +193,8 @@ SELECT f.title AS nombre_pelicula, c.name AS nombre_categoria
 
 /* Ejercicio 18:
 Muestra el nombre y apellido de los actores que aparecen en más de 10 películas.
-Respuesta: 'COUNT()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' con 3 Tablas' 
+Respuesta: 'COUNT()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' con 3 Tablas 
+Ruta JOINS: actor > film_actor > film 
 Pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
 
 SELECT a.first_name AS nombre_actor, a.last_name AS apellido, COUNT(fa.film_id) AS total_peliculas -- Columnas + Alias
@@ -197,16 +203,16 @@ SELECT a.first_name AS nombre_actor, a.last_name AS apellido, COUNT(fa.film_id) 
 			ON a.actor_id  = fa.actor_id -- FK
 		INNER JOIN film AS f -- Tabla 3 (contrastar datos)
 			ON fa.film_id = f.film_id -- FK
-    GROUP BY a.actor_id
-    HAVING total_peliculas > 10
-    ORDER BY total_peliculas ASC; -- Resultado: 200 datos 
+    GROUP BY a.actor_id -- Es mejor agrupar por IDs para evitar problemas con datos repetidos
+    HAVING total_peliculas > 10 -- Puedo usar su Alias aquí
+    ORDER BY total_peliculas ASC; -- Resultado: 200 datos - Ordenados de menor a mayor 
 
 /* Ejercicio 19:
 Encuentra el título de todas las películas que son "R" y tienen una duración mayor a 2 horas en la tabla film.
-Respuesta: 'WHERE' + 'AND'
+Respuesta: 'WHERE' + '=' + 'AND' + '>'
 Pd: 2h = 120 mins */
 
--- Observamos dónde podría ir la "R"
+-- Observamos dónde podría ir la "R" (Me suena, pero compruebo)
 SELECT *
 	FROM film;
     
@@ -216,7 +222,8 @@ SELECT title AS nombre_pelicula
 
 /* Ejercicio 20:
 Encuentra las categorías de películas que tienen un promedio de duración superior a 120 minutos y muestra el nombre de la categoría junto con el promedio de duración.
-Respuesta: 'AVG()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' con 3 Tablas' 
+Respuesta: 'AVG()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' con 3 Tablas
+Ruta JOINS: category > film_category > film
 Pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
 
 SELECT c.name AS nombre_categoria, AVG(f.length) AS promedio_duracion_peliculas -- Columnas + Alias
@@ -225,13 +232,14 @@ SELECT c.name AS nombre_categoria, AVG(f.length) AS promedio_duracion_peliculas 
 			ON c.category_id  = fc.category_id -- FK
 		INNER JOIN film AS f -- Tabla 3 (contrastar datos)
 			ON fc.film_id = f.film_id -- FK
-    GROUP BY nombre_categoria
+    GROUP BY nombre_categoria -- Puedo poner Alias aquí porque no es un registro único (ID)
     HAVING promedio_duracion_peliculas > 120
     ORDER BY promedio_duracion_peliculas ASC; -- Resultado: 4 datos 
 
 /* Ejercicio 21:
 Encuentra los actores que han actuado en al menos 5 películas y muestra el nombre del actor junto con la cantidad de películas en las que han actuado.
 Respuesta: 'COUNT()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' 
+Ruta JOINS: actor > film_actor
 Pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
 
 SELECT a.first_name AS nombre_actor, COUNT(fa.film_id) AS total_peliculas -- Columnas + Alias
@@ -245,7 +253,8 @@ SELECT a.first_name AS nombre_actor, COUNT(fa.film_id) AS total_peliculas -- Col
 /* Ejercicio 22:
 Encuentra el título de todas las películas que fueron alquiladas por más de 5 días. 
 Utiliza una subconsulta para encontrar los rental_ids con una duración superior a 5 días y luego selecciona las películas correspondientes.
-Respuesta:'DATEDIFF' + 'INNER JOIN' + 'WHERE' + 'Subconsulta' */
+Respuesta:'DATEDIFF' + 'INNER JOIN' + 'WHERE' + '>' + 'Subconsulta' 
+Ruta JOINS: inventory > rental */
 
 -- Consulta 1: Consultamos datos claves para saber qué tipos de datos nos ofrecen
 
@@ -261,7 +270,7 @@ SELECT rental_id -- Los IDs de los alquileres
 	FROM rental
     LIMIT 10;
 
--- Consulta 2: Calculamos la diferencia de los días de alquiler entre la fecha en el que se alquiló y la fecha que se devolvió la película --> 'DATEDIFF(fecha_final, fecha_inicial)' (Sino, la diferencia sale en números negativos)
+-- Consulta 2: Calculamos la diferencia entre los días de alquiler desde la fecha en el que se alquiló hasta la fecha en que se devolvió la película --> 'DATEDIFF(fecha_final, fecha_inicial)' (Sino, la diferencia sale en números negativos)
 
 SELECT DATEDIFF(return_date, rental_date) 
 	FROM rental
@@ -272,13 +281,13 @@ SELECT DATEDIFF(return_date, rental_date)
     WHERE DATEDIFF(return_date, rental_date) > 5
     LIMIT 10;
 
--- Consulta 3: Filtramos los IDs de las películas superiores a 5 días de alquiler -- 'DISTINCT' + 'INNER JOIN' + 'WHERE'
+-- Consulta 3: Filtramos los IDs de las películas superiores a 5 días de alquiler -- 'DISTINCT' + 'INNER JOIN' + 'WHERE' + '>'
 
 SELECT i.film_id -- Columna
 	FROM inventory AS i -- Tabla 1 (principal)
 		INNER JOIN rental AS r -- Tabla 2 (contrastar datos) 
 			ON i.inventory_id = r.inventory_id -- FK
-	WHERE DATEDIFF(r.return_date, r.rental_date) > 5 -- Condición
+	WHERE DATEDIFF(r.return_date, r.rental_date) > 5 -- Filtro
     LIMIT 10;
     
 SELECT DISTINCT i.film_id -- Lo mismo, pero sin que haya repetidos
@@ -292,7 +301,7 @@ SELECT DISTINCT i.film_id -- Lo mismo, pero sin que haya repetidos
 
 SELECT title AS nombre_pelicula -- Consulta principal: "Encuentra el título de todas las películas"
 	FROM film
-	WHERE film_id IN (SELECT i.film_id -- Consulta interna - Condición: "Que fueron alquiladas por más de 5 días"
+	WHERE film_id IN (SELECT DISTINCT i.film_id -- Consulta interna - Condición: "Que fueron alquiladas por más de 5 días"
 							FROM inventory AS i
 								INNER JOIN rental AS r
 									ON i.inventory_id = r.inventory_id 
@@ -301,7 +310,8 @@ SELECT title AS nombre_pelicula -- Consulta principal: "Encuentra el título de 
 /* Ejercicio 23:
 Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría "Horror". 
 Utiliza una subconsulta para encontrar los actores que han actuado en películas de la categoría "Horror" y luego exclúyelos de la lista de actores.
-Respuesta: */
+Respuesta: 'INNER JOIN' con 4 Tablas + 'WHERE' + '=' + 'Subconsulta' 
+Ruta JOINS: film_actor > film > film_category > category */
 
 -- Consulta 1: Consultamos datos claves para saber qué tipos de datos nos ofrecen
 
@@ -317,9 +327,9 @@ SELECT DISTINCT name -- Los diferentes nombres de las categorías
 
 SELECT name 
 	FROM category
-	WHERE name = "Horror"; -- Resutado: 1 dato
+	WHERE name = "Horror"; -- Resutado: 1 dato - Existe la categoría
 
--- Consulta 3: Filtramos los diferentes IDs de los artistas que han actuado en las películas con la categoría "Horror"  
+-- Consulta 3: Filtramos los diferentes IDs de los artistas que SI han actuado en las películas con la categoría "Horror"  
 
 SELECT DISTINCT fa.actor_id -- Columna
 	FROM film_actor AS fa -- Tabla 1 (principal)
@@ -329,14 +339,14 @@ SELECT DISTINCT fa.actor_id -- Columna
 			ON f.film_id = fc.film_id -- FK
 		INNER JOIN category AS c -- Tabla 4 (contrastar datos) 
 			ON fc.category_id = c.category_id -- FK
-	WHERE c.name = "Horror"
+	WHERE c.name = "Horror" -- Filtro
     LIMIT 10;
     
 -- Subconsulta: Juntamos las Consultas 1 y 3
 
 SELECT first_name AS nombre_actor, last_name AS apellido -- Consulta principal: "Encuentra el nombre y apellido de los actores"
 	FROM actor
-	WHERE actor_id NOT IN (SELECT DISTINCT fa.actor_id -- Consulta interna - Condición: "Que no han actuado en ninguna película de la categoría "Horror"
+	WHERE actor_id NOT IN (SELECT DISTINCT fa.actor_id -- Consulta interna - Condición: "Que NO han actuado en ninguna película de la categoría "Horror"
 								FROM film_actor AS fa 
 									INNER JOIN film AS f 
 										ON fa.film_id = f.film_id 
@@ -348,8 +358,10 @@ SELECT first_name AS nombre_actor, last_name AS apellido -- Consulta principal: 
 
 /* Ejercicio 24:
 Encuentra el título de las películas que son comedias y tienen una duración mayor a 180 minutos en la tabla film.
-Respuesta: */
+Respuesta: 'INNER JOIN' con 3 Tablas + 'WHERE' + '=' + 'AND' + '>'
+Ruta JOINS: film > film_category > category */
 
+-- Buscamos dónde puede ir la palabra "comedia" = comedy
 SELECT *
 	FROM film
     LIMIT 10;
@@ -359,20 +371,21 @@ SELECT DISTINCT description
 
 SELECT *
 	FROM film
-    WHERE description LIKE "% Comedy %"; -- Resultado: No se encuentra la palabra
+    WHERE description LIKE "%Comedy%"; -- Resultado: No se encuentra la palabra en la tabla film
 
 SELECT DISTINCT name
-	FROM category; -- Resultado: Se muestra en esta tabla la palabra "Comedy"
+	FROM category; -- Resultado: Se ecuentra en la tabla category la palabra "Comedy"
 
-SELECT f.title AS nombre_pelicula
-	FROM film AS f
-		INNER JOIN film_category AS fc
-			ON f.film_id = fc.film_id
-		INNER JOIN category AS c
-			ON fc.category_id = c.category_id
+-- Comparamos datos en diferenes tablas - SOLUCIÓN
+SELECT f.title AS nombre_pelicula -- Columna
+	FROM film AS f -- Tabla 1 (principal)
+		INNER JOIN film_category AS fc -- Tabla 2 (contrastar datos) - Hay que pasar por aquí para llegar a ambas tablas
+			ON f.film_id = fc.film_id -- FK
+		INNER JOIN category AS c -- Tabla 3 (contrastar datos)
+			ON fc.category_id = c.category_id -- FK
 	WHERE c.name = "Comedy" AND f.length > 180; -- Resultado: 3 datos
 
--- Comprobamos
+-- Comprobamos qee todos los datos coinciden y están correctos
 SELECT f.title AS nombre_pelicula, c.name AS nombre_categoria, f.length AS duracion_pelicula
 	FROM film AS f
 		INNER JOIN film_category AS fc
@@ -380,4 +393,3 @@ SELECT f.title AS nombre_pelicula, c.name AS nombre_categoria, f.length AS durac
 		INNER JOIN category AS c
 			ON fc.category_id = c.category_id
 	WHERE c.name = "Comedy" AND f.length > 180; -- Resultado: 3 datos
-
