@@ -189,7 +189,7 @@ SELECT f.title AS nombre_pelicula, c.name AS nombre_categoria
 /* Ejercicio 18:
 Muestra el nombre y apellido de los actores que aparecen en más de 10 películas.
 Respuesta: 'COUNT()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' con 3 Tablas' 
-pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
+Pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
 
 SELECT a.first_name AS nombre_actor, a.last_name AS apellido, COUNT(fa.film_id) AS total_peliculas -- Columnas + Alias
 	FROM actor AS a -- Tabla 1 (principal)
@@ -217,7 +217,7 @@ SELECT title AS nombre_pelicula
 /* Ejercicio 20:
 Encuentra las categorías de películas que tienen un promedio de duración superior a 120 minutos y muestra el nombre de la categoría junto con el promedio de duración.
 Respuesta: 'AVG()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' con 3 Tablas' 
-pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
+Pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
 
 SELECT c.name AS nombre_categoria, AVG(f.length) AS promedio_duracion_peliculas -- Columnas + Alias
 	FROM category AS c -- Tabla 1 (principal)
@@ -225,10 +225,38 @@ SELECT c.name AS nombre_categoria, AVG(f.length) AS promedio_duracion_peliculas 
 			ON c.category_id  = fc.category_id -- FK
 		INNER JOIN film AS f -- Tabla 3 (contrastar datos)
 			ON fc.film_id = f.film_id -- FK
-    GROUP BY c.name
+    GROUP BY nombre_categoria
     HAVING promedio_duracion_peliculas > 120
     ORDER BY promedio_duracion_peliculas ASC; -- Resultado: 4 datos 
 
 /* Ejercicio 21:
-Recupera los nombres de todos los actores
+Encuentra los actores que han actuado en al menos 5 películas y muestra el nombre del actor junto con la cantidad de películas en las que han actuado.
+Respuesta: 'COUNT()' + 'GROUP BY' + 'HAVING' + 'ORDER BY' + 'INNER JOIN' 
+Pd: Se podría resolver con una Subconsulta, pero no consigo hacerla del todo bien */
+
+SELECT a.first_name AS nombre_actor, COUNT(fa.film_id) AS total_peliculas -- Columnas + Alias
+	FROM actor AS a -- Tabla 1 (principal)
+		INNER JOIN film_actor AS fa -- Tabla 2 (contrastar datos) 
+			ON a.actor_id = fa.actor_id -- FK
+    GROUP BY nombre_actor
+    HAVING total_peliculas > 5
+    ORDER BY total_peliculas ASC; -- Resultado: 128 datos 
+
+/* Ejercicio 22:
+Encuentra el título de todas las películas que fueron alquiladas por más de 5 días. 
+Utiliza una subconsulta para encontrar los rental_ids con una duración superior a 5 días y luego selecciona las películas correspondientes.
 Respuesta: */
+
+
+
+/* Ejercicio 23:
+Encuentra el nombre y apellido de los actores que no han actuado en ninguna película de la categoría "Horror". 
+Utiliza una subconsulta para encontrar los actores que han actuado en películas de la categoría "Horror" y luego exclúyelos de la lista de actores.
+Respuesta: */
+
+
+
+/* Ejercicio 24:
+Encuentra el título de las películas que son comedias y tienen una duración mayor a 180 minutos en la tabla film.
+Respuesta: */
+
